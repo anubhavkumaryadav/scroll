@@ -1,8 +1,13 @@
 /** @type {import('next').NextConfig} */
+const isProd = process.env.NODE_ENV === 'production';
+const repositoryName = 'scroll'; // Your exact repository name
+
 const nextConfig = {
-  output: 'export', // Essential for GitHub Pages static hosting
+  output: 'export',
+  basePath: isProd ? `/${repositoryName}` : '',
+  assetPrefix: isProd ? `/${repositoryName}/` : '',
   images: {
-    unoptimized: true, // Required for static export with external image assets
+    unoptimized: true,
   },
 };
 
