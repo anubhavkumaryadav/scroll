@@ -1,69 +1,122 @@
-import Image from "next/image";
+'use client';
+import { useEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 export default function Home() {
+  const containerRef = useRef(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    let ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top top",
+          end: "+=2000",
+          pin: true,
+          scrub: 1,
+          onUpdate: (self) => {
+            setScrollProgress(Math.round(self.progress * 100));
+          }
+        }
+      });
+
+      tl.to("#hero-car", {
+        x: "75vw", 
+        ease: "none"
+      }, 0)
+      .to("#text-reveal-mask", {
+        width: "100%",
+        ease: "none"
+      }, 0)
+      .to("#hero-content-wrapper", {
+        y: -250,
+        ease: "none"
+      }, 0);
+
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, [isMounted]);
+
+  if (!isMounted) return null;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.js
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="bg-slate-950 min-h-[250vh] relative">
+      
+      {/* Sticky/Pinned Hero Section */}
+      <main ref={containerRef} className="sticky top-0 h-screen w-full bg-slate-950 text-white flex flex-col justify-between items-center overflow-hidden p-6 select-none">
+        
+        {/* Background Cinematic Car Image */}
+        <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
+          <img 
+            src="https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=1200&auto=format&fit=crop" 
+            alt="Background Car" 
+            className="w-full h-full object-cover"
+          />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Content Wrapper that moves significantly upward on scroll */}
+        <div id="hero-content-wrapper" className="w-full h-full flex flex-col justify-between items-center relative z-30">
+
+          {/* Top Header */}
+          <div className="text-center mt-4">
+            <h1 className="text-xl md:text-3xl font-extrabold tracking-[0.4em] uppercase text-cyan-400 drop-shadow-md">
+              W E L C O M E &nbsp; I T Z F I Z Z
+            </h1>
+          </div>
+
+          {/* Center Road Track & Revealing Text */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+            <div className="w-full h-48 md:h-56 bg-neutral-900 relative flex items-center overflow-hidden border-y-4 border-black shadow-2xl">
+              
+              <div id="text-reveal-mask" className="absolute left-0 top-0 h-full w-0 bg-[#22c55e] flex items-center px-10 overflow-hidden border-r-4 border-black whitespace-nowrap">
+                <h2 className="text-4xl md:text-7xl font-black tracking-widest uppercase text-black">
+                  W E L C O M E &nbsp; I T Z F I Z Z
+                </h2>
+              </div>
+
+              {/* Horizontal McLaren 720S Car Image */}
+              <img 
+                id="hero-car" 
+                src="https://paraschaturvedi.github.io/car-scroll-animation/McLaren%20720S%202022%20top%20view.png" 
+                alt="McLaren 720S Top Down" 
+                className="absolute left-4 w-44 md:w-60 h-auto object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.9)] z-40"
+              />
+
+            </div>
+          </div>
+
+          {/* Bottom Scroll Percentage Progress Section (0% to 100%) */}
+          <div className="mb-6 w-full max-w-md bg-slate-900/90 p-4 rounded-xl border border-cyan-500/40 shadow-2xl backdrop-blur-md text-center">
+            <div className="text-xs font-semibold tracking-widest text-cyan-400 mb-1 uppercase">
+              Scroll Journey Progress
+            </div>
+            <div className="text-4xl md:text-5xl font-extrabold text-white tracking-wider">
+              {scrollProgress}%
+            </div>
+            <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden mt-3 border border-slate-800">
+              <div 
+                className="bg-gradient-to-r from-cyan-400 to-emerald-400 h-full rounded-full shadow-[0_0_12px_rgba(34,211,238,0.8)] transition-all duration-75"
+                style={{ width: `${scrollProgress}%` }}
+              ></div>
+            </div>
+          </div>
+
         </div>
+
       </main>
+
     </div>
   );
 }
